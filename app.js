@@ -1,3 +1,8 @@
+// ===== FONDOS PREDETERMINADOS =====
+// Sube tus imagenes junto a index.html y escribe aqui sus nombres (hasta 10 o mas).
+// Si una imagen no existe, simplemente no aparece en la galeria.
+var FONDOS=['fondo-1.jpg','fondo-2.jpg','fondo-3.jpg','fondo-4.jpg','fondo-5.jpg','fondo-6.jpg','fondo-7.jpg','fondo-8.jpg','fondo-9.jpg','fondo-10.jpg'];
+// ===================================
 (function(){
 var $=function(i){return document.getElementById(i)};
 var cv=$('cv'),ctx=cv.getContext('2d'),W=1080,H=1350,M=[],bgimg=null;
@@ -50,7 +55,7 @@ function bg(){
   var k=$('fondo').value,c1=$('c1').value,c2=$('c2').value,c3=$('c3').value,i;seed=7;
   if(k==='foto'&&bgimg){
     var s=Math.max(W/bgimg.width,H/bgimg.height);ctx.drawImage(bgimg,(W-bgimg.width*s)/2,(H-bgimg.height*s)/2,bgimg.width*s,bgimg.height*s);
-    var g=ctx.createLinearGradient(0,0,0,H);g.addColorStop(0,'rgba(0,0,0,.55)');g.addColorStop(.5,'rgba(0,0,0,.35)');g.addColorStop(1,'rgba(0,0,0,.8)');ctx.fillStyle=g;ctx.fillRect(0,0,W,H);return;
+    var g=ctx.createLinearGradient(0,0,0,H);var ok=$('osc').value/50;g.addColorStop(0,'rgba(0,0,0,'+Math.min(1,.55*ok)+')');g.addColorStop(.5,'rgba(0,0,0,'+Math.min(1,.35*ok)+')');g.addColorStop(1,'rgba(0,0,0,'+Math.min(1,.8*ok)+')');ctx.fillStyle=g;ctx.fillRect(0,0,W,H);return;
   }
   if(k==='relampago'){
     vgrad(c1,c2);
@@ -173,15 +178,30 @@ function addMatch(a,b){
 function loadFont(){try{Promise.all(['Anton','Bebas Neue','Black Ops One','Bangers','Russo One','Metal Mania','Racing Sans One','Kaushan Script','Permanent Marker'].map(function(f){return document.fonts.load('40px "'+f+'"','ABCÑÁÉÍÓÚ 0123')})).then(draw)}catch(e){}}
 $('add').addEventListener('click',function(){addMatch('','')});
 $('fondo').addEventListener('change',function(){setPre(this.value);draw()});
-$('foto').addEventListener('change',function(){readImg(this.files[0],function(im){bgimg=im;$('fondo').value='foto';draw()})});
-['t1','t2','t3','cinta','fecha','hora','pref','etq','lugar','lugar2','lema','fuenteLema','fuente','spons','c1','c2','c3','efecto','efecto2','forma','oNames','oBall','oStreak','sLogo','sName','sTit'].forEach(function(i){$(i).addEventListener('input',draw);$(i).addEventListener('change',draw)});
+$('foto').addEventListener('change',function(){readImg(this.files[0],function(im){bgimg=im;$('fondo').value='foto';[].forEach.call($('gal').children,function(x){x.classList.remove('on')});draw()})});
+['t1','t2','t3','cinta','fecha','hora','pref','etq','lugar','lugar2','lema','fuenteLema','fuente','spons','c1','c2','c3','efecto','efecto2','forma','oNames','oBall','oStreak','sLogo','sName','sTit','osc'].forEach(function(i){$(i).addEventListener('input',draw);$(i).addEventListener('change',draw)});
 $('fuente').addEventListener('change',loadFont);
-function guardar(){drawNow();var u=cv.toDataURL('image/png');$('out').src=u;$('dl').href=u;$('modal').style.display='flex'}
+function guardar(){drawNow();var u;try{u=cv.toDataURL('image/png')}catch(e){alert('Para guardar con los fondos predeterminados, la página debe estar subida a internet (no abierta desde el archivo).');return}$('out').src=u;$('dl').href=u;$('modal').style.display='flex'}
 $('gen').addEventListener('click',guardar);$('gen2').addEventListener('click',guardar);
 $('cl').addEventListener('click',function(){$('modal').style.display='none'});
 $('modal').addEventListener('click',function(e){if(e.target===this)this.style.display='none'});
 $('fijar').addEventListener('change',function(){$('prev').classList.toggle('nofix',!this.checked)});
 $('pv').addEventListener('input',function(){document.documentElement.style.setProperty('--pv',this.value)});
 addMatch('Oro del Mar','Lesly');addMatch('El Naranjal','Chimbi');addMatch('Kraken','Deliany');addMatch('Diana','Vuelve a Cristo');
+FONDOS.forEach(function(src,i){
+  var b=document.createElement('button');b.type='button';b.title='Fondo '+(i+1);
+  var im=new Image();im.alt='Fondo '+(i+1);im.loading='lazy';
+  im.onload=function(){$('galt').style.display='block'};
+  im.onerror=function(){b.remove()};
+  im.src=src;b.appendChild(im);
+  b.addEventListener('click',function(){
+    var big=new Image();
+    big.onload=function(){bgimg=big;$('fondo').value='foto';[].forEach.call($('gal').children,function(x){x.classList.remove('on')});b.classList.add('on');draw()};
+    big.src=src});
+  $('gal').appendChild(b)});
+function setTema(t){document.documentElement.setAttribute('data-tema',t);[].forEach.call(document.querySelectorAll('.dots button'),function(b){b.classList.toggle('on',b.getAttribute('data-t')===t)});try{localStorage.setItem('tema',t)}catch(e){}}
+[].forEach.call(document.querySelectorAll('.dots button'),function(b){b.addEventListener('click',function(){setTema(b.getAttribute('data-t'))})});
+var tt='azul';try{tt=localStorage.getItem('tema')||'azul'}catch(e){}
+setTema(tt);
 window.addEventListener('load',loadFont);
 })();
